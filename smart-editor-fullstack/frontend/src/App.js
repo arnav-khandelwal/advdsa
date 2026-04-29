@@ -21,15 +21,20 @@ function App() {
         fetchData();
     }, []);
 
-    const handleApiCall = async (endpoint, body) => {
+    const handleApiCall = async (endpoint, body = {}) => { // Add default empty object for body
         try {
             const response = await fetch(`${API_URL}/${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
-            setEditorState(data);
+            if (data && data.text !== undefined) { // Ensure data is valid before setting state
+                setEditorState(data);
+            }
         } catch (error) {
             console.error(`Error with ${endpoint}:`, error);
         }
@@ -57,6 +62,10 @@ function App() {
             handleInsert(e.key);
         } else if (e.key === 'Backspace') {
             handleBackspace();
+        } else if (e.key === 'ArrowLeft') {
+            handleApiCall('move-left');
+        } else if (e.key === 'ArrowRight') {
+            handleApiCall('move-right');
         }
     };
 
@@ -74,12 +83,12 @@ function App() {
                     tabIndex={0}
                     ref={editorRef}
                 >
-                    {editorState.text.split('').map((char, index) => (
-                        <span key={index} className={index === editorState.cursor ? 'cursor' : ''}>
-                            {char}
+                    {editorState && editorState.text ? editorState.text.split('').map((char, index) => (
+                        <span key={index} className={index === editorState.cursor ? 'cursor-char' : ''}>
+                            {char === ' ' ? '\u00A0' : char}
                         </span>
-                    ))}
-                    {editorState.cursor === editorState.text.length && <span className="cursor"></span>}
+                    )) : null}
+                    {editorState && editorState.text && editorState.cursor === editorState.text.length && <span className="cursor-end"></span>}
                 </div>
             </div>
             <div className="controls">

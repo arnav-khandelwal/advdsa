@@ -22,13 +22,24 @@ h1 {
   line-height: 1.5;
 }
 
-.cursor {
-  display: inline-block;
+.editor-area span.cursor-char::before {
+  content: '';
+  position: absolute;
   width: 1px;
+  height: 1.5rem;
   background-color: black;
   animation: blink 1s infinite;
-  margin-left: -1px;
 }
+
+.editor-area .cursor-end::before {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 1.5rem;
+  background-color: black;
+  animation: blink 1s infinite;
+}
+
 
 @keyframes blink {
   0%, 100% { opacity: 1; }

@@ -304,6 +304,12 @@ void handle_connection(int client_socket) {
     } else if (request.find("POST /redo") != std::string::npos) {
         globalEditor.redo();
         response_body = create_json_response(globalEditor.getText(), globalEditor.getCursorPosition());
+    } else if (request.find("POST /move-left") != std::string::npos) {
+        globalEditor.moveCursorLeft();
+        response_body = create_json_response(globalEditor.getText(), globalEditor.getCursorPosition());
+    } else if (request.find("POST /move-right") != std::string::npos) {
+        globalEditor.moveCursorRight();
+        response_body = create_json_response(globalEditor.getText(), globalEditor.getCursorPosition());
     } else if (request.find("GET /state") != std::string::npos) {
         response_body = create_json_response(globalEditor.getText(), globalEditor.getCursorPosition());
     } else if (request.find("GET /") != std::string::npos) {
