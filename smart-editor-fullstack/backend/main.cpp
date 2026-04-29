@@ -310,6 +310,22 @@ void handle_connection(int client_socket) {
     } else if (request.find("POST /move-right") != std::string::npos) {
         globalEditor.moveCursorRight();
         response_body = create_json_response(globalEditor.getText(), globalEditor.getCursorPosition());
+    } else if (request.find("POST /search") != std::string::npos) {
+        std::string body = request.substr(request.find("\r\n\r\n") + 4);
+        size_t pattern_pos = body.find("\"pattern\":\"");
+        if (pattern_pos != std::string::npos) {
+            size_t start = pattern_pos + 11;
+            size_t end = body.find("\"", start);
+            std::string pattern = body.substr(start, end - start);
+            std::vector<int> positions = globalEditor.search(pattern);
+            std::stringstream ss;
+            ss << "{\"positions\":[";
+            for (size_t i = 0; i < positions.size(); ++i) {
+                ss << positions[i] << (i == positions.size() - 1 ? "" : ",");
+            }
+            ss << "]}";
+            response_body = ss.str();
+        }
     } else if (request.find("GET /state") != std::string::npos) {
         response_body = create_json_response(globalEditor.getText(), globalEditor.getCursorPosition());
     } else if (request.find("GET /") != std::string::npos) {

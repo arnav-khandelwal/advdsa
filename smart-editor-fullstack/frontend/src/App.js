@@ -5,6 +5,8 @@ const API_URL = 'http://localhost:8080';
 
 function App() {
     const [editorState, setEditorState] = useState({ text: '', cursor: 0 });
+    const [searchPattern, setSearchPattern] = useState('');
+    const [highlightedPositions, setHighlightedPositions] = useState([]);
     const editorRef = useRef(null);
 
     const fetchData = async () => {
@@ -21,7 +23,7 @@ function App() {
         fetchData();
     }, []);
 
-    const handleApiCall = async (endpoint, body = {}) => { // Add default empty object for body
+    const handleApiCall = async (endpoint, body = {}) => {
         try {
             const response = await fetch(`${API_URL}/${endpoint}`, {
                 method: 'POST',
@@ -32,9 +34,10 @@ function App() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            if (data && data.text !== undefined) { // Ensure data is valid before setting state
+            if (data && data.text !== undefined) {
                 setEditorState(data);
             }
+            return data; // Return data for search
         } catch (error) {
             console.error(`Error with ${endpoint}:`, error);
         }
@@ -56,6 +59,18 @@ function App() {
         handleApiCall('redo');
     };
 
+    const handleSearch = async (pattern) => {
+        setSearchPattern(pattern);
+        if (pattern) {
+            const data = await handleApiCall('search', { pattern });
+            if (data && data.positions) {
+                setHighlightedPositions(data.positions);
+            }
+        } else {
+            setHighlightedPositions([]);
+        }
+    };
+
     const handleKeyPress = (e) => {
         e.preventDefault();
         if (e.key.length === 1) {
@@ -73,9 +88,26 @@ function App() {
         editorRef.current.focus();
     };
 
+    const isHighlighted = (index) => {
+        for (const pos of highlightedPositions) {
+            if (index >= pos && index < pos + searchPattern.length) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     return (
         <div className="App">
             <h1>Smart Text Editor</h1>
+            <div className="search-container">
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchPattern}
+                    onChange={(e) => handleSearch(e.target.value)}
+                />
+            </div>
             <div className="editor-container" onClick={focusEditor}>
                 <div 
                     className="editor-area" 
@@ -84,7 +116,10 @@ function App() {
                     ref={editorRef}
                 >
                     {editorState && editorState.text ? editorState.text.split('').map((char, index) => (
-                        <span key={index} className={index === editorState.cursor ? 'cursor-char' : ''}>
+                        <span 
+                            key={index} 
+                            className={`${index === editorState.cursor ? 'cursor-char' : ''} ${isHighlighted(index) ? 'highlight' : ''}`}
+                        >
                             {char === ' ' ? '\u00A0' : char}
                         </span>
                     )) : null}

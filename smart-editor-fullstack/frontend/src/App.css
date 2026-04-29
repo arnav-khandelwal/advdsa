@@ -64,7 +64,16 @@ button:hover {
   background-color: #e0e0e0;
 }
 
-.instructions {
-  margin-top: 2rem;
-  color: #666;
+.highlight {
+  background-color: yellow;
+}
+
+.search-container {
+  margin: 1rem 0;
+}
+
+.search-container input {
+  font-size: 1rem;
+  padding: 0.5rem;
+  width: 50%;
 }
