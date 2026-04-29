@@ -12,9 +12,8 @@ h1 {
   width: 80%;
   margin: 2rem auto;
   padding: 1rem;
-  min-height: 200px;
-  text-align: left;
-}
+  min-height: 500px;
+  text-align: left;  cursor: text;}
 
 .editor-area {
   outline: none;

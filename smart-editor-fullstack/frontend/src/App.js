@@ -7,6 +7,7 @@ function App() {
     const [editorState, setEditorState] = useState({ text: '', cursor: 0 });
     const [searchPattern, setSearchPattern] = useState('');
     const [highlightedPositions, setHighlightedPositions] = useState([]);
+    const [isFocused, setIsFocused] = useState(false);
     const editorRef = useRef(null);
 
     const fetchData = async () => {
@@ -109,21 +110,23 @@ function App() {
                 />
             </div>
             <div className="editor-container" onClick={focusEditor}>
-                <div 
-                    className="editor-area" 
-                    onKeyDown={handleKeyPress} 
+                <div
+                    className="editor-area"
+                    onKeyDown={handleKeyPress}
                     tabIndex={0}
                     ref={editorRef}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
                 >
                     {editorState && editorState.text ? editorState.text.split('').map((char, index) => (
-                        <span 
-                            key={index} 
-                            className={`${index === editorState.cursor ? 'cursor-char' : ''} ${isHighlighted(index) ? 'highlight' : ''}`}
+                        <span
+                            key={index}
+                            className={`${isFocused && index === editorState.cursor ? 'cursor-char' : ''} ${isHighlighted(index) ? 'highlight' : ''}`}
                         >
                             {char === ' ' ? '\u00A0' : char}
                         </span>
                     )) : null}
-                    {editorState && editorState.text && editorState.cursor === editorState.text.length && <span className="cursor-end"></span>}
+                    {editorState && editorState.text && isFocused && editorState.cursor === editorState.text.length && <span className="cursor-end"></span>}
                 </div>
             </div>
             <div className="controls">
